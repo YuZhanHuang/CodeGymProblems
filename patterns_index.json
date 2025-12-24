@@ -1,0 +1,126 @@
+[
+    {
+        "pattern": "03_sliding_window",
+        "paradigm": [
+            "iteration",
+            "two-pointers",
+            "sliding-window"
+        ],
+        "ds": [
+            "array",
+            "hash"
+        ],
+        "goal": [
+            "optimize:min/len",
+            "enumerate"
+        ],
+        "constraints": [
+            "window:variable",
+            "mutable"
+        ],
+        "risks": [
+            "dedup",
+            "boundary"
+        ],
+        "complexity": {
+            "time": "O(n)",
+            "space": "O(k)"
+        }
+    },
+    {
+        "pattern": "06_heaps",
+        "paradigm": [
+            "heap"
+        ],
+        "ds": [
+            "heap"
+        ],
+        "goal": [
+            "top-k",
+            "k-th",
+            "merge-k"
+        ],
+        "constraints": [
+            "needs comparator"
+        ],
+        "risks": [
+            "overflow",
+            "comparator-bug"
+        ],
+        "complexity": {
+            "time": "O(n log k)",
+            "space": "O(k)"
+        }
+    },
+    {
+        "pattern": "10_subsets",
+        "paradigm": [
+            "recursion",
+            "backtracking"
+        ],
+        "ds": [
+            "array"
+        ],
+        "goal": [
+            "enumerate"
+        ],
+        "constraints": [
+            "sorted/unsorted"
+        ],
+        "risks": [
+            "dedup",
+            "branch-explosion"
+        ],
+        "complexity": {
+            "time": "O(2^n)",
+            "space": "O(n)"
+        }
+    },
+    {
+        "pattern": "15_topological_sort",
+        "paradigm": [
+            "DFS",
+            "BFS"
+        ],
+        "ds": [
+            "graph"
+        ],
+        "goal": [
+            "order",
+            "cycle-detect"
+        ],
+        "constraints": [
+            "DAG-only"
+        ],
+        "risks": [
+            "boundary",
+            "in-degree-zero-handling"
+        ],
+        "complexity": {
+            "time": "O(V+E)",
+            "space": "O(V+E)"
+        }
+    },
+    {
+        "pattern": "25_union_find",
+        "paradigm": [
+            "union-find"
+        ],
+        "ds": [
+            "disjoint-set"
+        ],
+        "goal": [
+            "connectivity"
+        ],
+        "constraints": [
+            "offline/online"
+        ],
+        "risks": [
+            "path-compression-impl"
+        ],
+        "complexity": {
+            "time": "α(n)",
+            "space": "O(n)"
+        }
+    }
+]
