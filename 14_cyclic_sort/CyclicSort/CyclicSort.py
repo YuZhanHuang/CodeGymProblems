@@ -1,5 +1,6 @@
 # Cyclic Sort
 
+
 def cyclic_sort(nums):
     idx = 0
     while idx < len(nums):
@@ -8,7 +9,7 @@ def cyclic_sort(nums):
             nums[idx], nums[correct] = nums[correct], nums[idx]
         else:
             idx += 1
-    
+
     return nums
 
 
@@ -19,7 +20,7 @@ if __name__ == "__main__":
         ([2, 6, 4, 3, 1, 5], [1, 2, 3, 4, 5, 6]),
         ([1, 5, 6, 4, 3, 2], [1, 2, 3, 4, 5, 6]),
     ]
-    
+
     print("Testing Cyclic Sort:")
     all_passed = True
     for i, (nums, expected) in enumerate(test_cases, 1):
@@ -29,6 +30,5 @@ if __name__ == "__main__":
         if result != expected:
             all_passed = False
         print(f"Test {i}: {status} cyclic_sort({nums}) = {result}, expected {expected}")
-    
-    print(f"\n{'All tests passed!' if all_passed else 'Some tests failed!'}")
 
+    print(f"\n{'All tests passed!' if all_passed else 'Some tests failed!'}")
