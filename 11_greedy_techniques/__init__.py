@@ -1,0 +1,4 @@
+"""
+Greedy Techniques Pattern Problems
+"""
+

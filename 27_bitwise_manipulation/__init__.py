@@ -1,0 +1,4 @@
+"""
+Bitwise Manipulation Pattern Problems
+"""
+
