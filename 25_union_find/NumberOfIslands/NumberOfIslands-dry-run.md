@@ -1,4 +1,4 @@
-# 題目01 - Dry Run
+# Number of Islands - Dry Run
 
 ## 1) Spec Checkpoints（規格檢核點）
 - [填寫]
@@ -23,3 +23,4 @@
 
 ## 8) Bugs / Fixes（缺陷 / 修正）
 - [填寫]
+
