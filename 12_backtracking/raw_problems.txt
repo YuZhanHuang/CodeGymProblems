@@ -1,0 +1,316 @@
+Word Search
+
+Statement
+
+Given an m×n 2D grid of characters and word as a string, we need to determine if the word can be constructed from letters of sequentially adjacent cells. The cells are considered sequentially adjacent when they are neighbors to each other either horizontally or vertically. The function should return TRUE if the word can be constructed and FALSE otherwise.
+
+https://leetcode.com/problems/word-search/
+
+Constraints
+
+m = board.length
+
+n = board[i].length, where 0 ≤ i < m
+
+1 ≤ m, n ≤ 6
+
+1 ≤ word.length ≤ 15
+
+board and word consist of only lowercase or uppercase English letters.
+
+The search is not case-sensitive.
+
+def dfs(row, col, idx, word, grid):
+    if len(word) == idx:
+        return True
+        
+    if row < 0 or row >= len(grid) or col < 0 or col >= len(grid[0]) or grid[row][col] != word[idx]:
+        return False
+    
+    temp = grid[row][col]
+    grid[row][col] = '*'
+    
+    for row_offset, col_offset in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+        if dfs(row+row_offset, col+col_offset, idx+1, word, grid):
+            return True
+    
+    grid[row][col] = temp
+    
+    return False
+
+
+def word_search(grid, word):
+    m = len(grid)
+    n = len(grid[0])
+    
+    for row in range(m):
+        for col in range(n):
+            if dfs(row, col, 0, word, grid):
+                return True
+
+    return False
+
+
+Restore IP Addresses
+
+
+Statement
+
+Given that a string, s, contains digits, return a list of all possible valid IP addresses that can be obtained from the string.
+
+Note: The order in which IP addresses are placed in the list is not important.
+
+A valid IP address is made up of four numbers separated by dots ., for example, 255.255.255.123. Each number falls between 0 and 255 (including 0 and 255), and none of them can have leading zeros.
+
+https://leetcode.com/problems/restore-ip-addresses/?utm_source=chatgpt.com
+
+Constraints
+
+The input string s consists of digits only.
+
+4 ≤ s.length ≤ 12
+
+def valid(s):
+    if len(s) > 3:
+        return False
+
+    return int(s) <= 255 if s[0] != '0' else len(s) == 1
+
+
+def update_segments(s, curr_dot, segments, result):
+    segment = s[curr_dot+1:len(s)]
+
+    if valid(segment):
+        segments.append(segment)
+        result.append('.'.join(segments))
+        segments.pop()
+
+
+def backtrack(s, prev_dot, dots, segments, result):
+    size = len(s)
+
+    for curr_dot in range(prev_dot+1, min(prev_dot+4, size-1)):
+        segment = s[prev_dot+1:curr_dot+1]
+
+        if valid(segment):
+            segments.append(segment)
+            if dots - 1 == 0:
+                update_segments(s, curr_dot, segments, result)
+            else:
+                backtrack(s, curr_dot, dots-1, segments, result)
+            
+            segments.pop()
+
+def restore_ip_addresses(s):
+    result = []
+    segments = []
+    backtrack(s, -1, 3, segments, result)
+
+    return result
+
+House Robber III
+
+Statement
+
+A thief has discovered a new neighborhood to target, where the houses can be represented as nodes in a binary tree. The money in the house is the data of the respective node. The thief can enter the neighborhood from a house represented as root of the binary tree. Each house has only one parent house. The thief knows that if he robs two houses that are directly connected, the police will be notified. The thief wants to know the maximum amount of money he can steal from the houses without getting caught by the police. The thief needs your help determining the maximum amount of money he can rob without alerting the police.
+
+House Robber III: This is the exact problem you're solving. It asks you to find the maximum amount of money that can be robbed from a binary tree, with the restriction that no two directly connected houses (nodes) can be robbed.
+
+Constraints
+
+The number of nodes in the tree is in the range [1, 10^4].
+
+0 ≤ node.data ≤ 10^4
+
+# Definition for a binary tree node
+# class TreeNode:
+#     def __init__(self, data):
+#         self.data = data
+#         self.left = None
+#         self.right = None
+
+from ds_v1.BinaryTree.BinaryTree import TreeNode
+
+def rob(root):
+    return max(heist(root))
+
+def heist(root):
+    if root is None:
+        return [0, 0]
+    
+    left_subtree = heist(root.left)
+    right_subtree = heist(root.right)
+    
+    include_root = root.data + left_subtree[1] + right_subtree[1]
+    exclude_root = max(left_subtree) + max(right_subtree)
+    
+    return [include_root, exclude_root]
+
+
+N-Queens
+
+Statement
+
+Given a chessboard of size n×n, determine how many ways n queens can be placed on the board, such that no two queens attack each other.
+
+A queen can move horizontally, vertically, and diagonally on a chessboard. One queen can be attacked by another queen if both share the same row, column, or diagonal.
+
+N-Queens: This is the classic problem you are working on. It asks for the solution of the N-Queens problem, where you need to return all valid solutions (not just the count) to the N-Queens problem.
+
+N-Queens II: This problem is a variant of the first problem where instead of returning all possible solutions, you need to return the number of distinct solutions.
+
+Constraints
+
+1 ≤ n ≤ 9
+
+from backtracking import *
+
+
+def is_valid_move(possible_row, possible_col, solution):
+    for old_row in range(possible_row):
+        old_col = solution[old_row]
+        # 同列衝突
+        if possible_col == old_col:
+            return False
+        # 同對角線衝突：行差 = 列差
+        if abs(possible_row - old_row) == abs(possible_col - old_col):
+            return False
+    return True
+
+
+def solve_n_queens_recursive(n, solution, row, result):
+	if row == n:
+		result.append(solution[:])
+		return
+  
+	for i in range(n):
+		if is_valid_move(row, i, solution):
+			solution[row] = i
+			solve_n_queens_recursive(n, solution, row+1, result)
+            solution[row] = -1
+
+
+def solve_n_queens(n):
+	result = []
+	solution = [-1] * n
+	solve_n_queens_recursive(n, solution, 0, result)
+
+	return len(result)
+
+
+def is_valid_move(possible_row: int, possible_col: int, solution: List[int]) -> bool:
+    for old_row in range(possible_row):
+        old_col = solution[old_row]
+        # 同列衝突
+        if possible_col == old_col:
+            return False
+        # 同對角線衝突：行差 = 列差
+        if abs(possible_row - old_row) == abs(possible_col - old_col):
+            return False
+    return True
+
+def solve_n_queens_iterative(n: int) -> List[List[int]]:
+    """
+    迭代版 n-Queens：返回所有解，每個解是長度 n 的 list，
+    list[row] = col 代表在 row 行放在 col 列。
+    """
+    solutions = []
+    solution = [-1] * n
+    row = 0
+
+    while row >= 0:
+        # 從上一個 col + 1 開始試
+        solution[row] += 1
+
+        # 找到下一個合法的 col，或試到 n 都失敗為止
+        while solution[row] < n and not is_valid_move(row, solution[row], solution):
+            solution[row] += 1
+
+        if solution[row] < n:
+            # 找到一個可放的位置
+            if row == n - 1:
+                # 最後一列也放好了，記錄解
+                solutions.append(solution.copy())
+                # 接著去下一個 col 試新的解
+                solution[row] += 1
+            else:
+                # 繼續下一層
+                row += 1
+                solution[row] = -1
+        else:
+            # 這一層沒有任何合法位置 → 回溯到上一層
+            solution[row] = -1
+            row -= 1
+
+    return solutions
+
+# 範例測試
+if __name__ == "__main__":
+    sols = solve_n_queens_iterative(8)
+    print(f"8 皇后共有 {len(sols)} 種解")
+    # 印出第一個解
+    print(sols[0])  # e.g. [0, 4, 7, 5, 2, 6, 1, 3]
+
+Flood Fill
+
+Statement
+
+We are given the following values as input to begin with:
+
+The coordinates of a source cell, i.e., sr and sc.
+
+A target value, target.
+
+An (m×n) grid.
+
+Our task is to perform flood fill by updating the values of the four directionally connected cells, which have the same value as the source cell with the target value.
+
+How to perform flood fill:
+
+Suppose that a (4×4) grid has a source value of 1 at coordinates [1,1]. We perform flood fill on its neighboring cells only if they have the same source value as this cell. Once all adjacent cells are updated, return the new grid after performing flood fill.
+
+If no neighboring cell has a value equal to the source cell, only update the source cell with the target value and return the updated grid.
+
+Flood Fill: This is the exact problem you're working on. It asks you to perform a flood fill on a grid starting from a given source cell and filling all connected cells that have the same value as the source with a target value.
+
+Constraints
+
+1 ≤ grid.length, grid[i].length ≤ 50
+
+0 ≤ grid[i][j], target ≤ 2**16
+
+0 ≤ sr < grid.length
+
+0 ≤ sc < grid[i].length
+
+
+def search_dfs(origin, sr, sc, grid, target):
+    # base case
+    if sr < 0 or sc < 0 or sr > len(grid) - 1 or sc > len(grid[sr]) - 1:
+        return 
+
+    # grid[sr][sc] == target 碰到起點
+    if grid[sr][sc] != origin:
+        return
+    
+    grid[sr][sc] = target
+
+    for row_offset, col_offset in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+        search_dfs(origin, sr+row_offset, sc+col_offset, grid, target)
+
+
+def flood_fill(grid, sr, sc, target):
+    if not grid:
+        return []
+
+    if grid[sr][sc] == target:
+        return grid
+
+    origin = grid[sr][sc]
+    search_dfs(origin, sr, sc, grid, target)
+
+    return grid
+
+
+
+
