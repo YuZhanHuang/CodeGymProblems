@@ -1,0 +1,351 @@
+Level Order Traversal of Binary Tree
+
+Statement
+
+Given the root of a binary tree, display the values of its nodes while performing a level order traversal. Return the node values for all levels in a string separated by the character :. If the tree is empty, i.e., the number of nodes is 0, then return “None” as the output.
+
+Constraints
+
+The number of nodes in the tree is in the range [0, 500].
+
+$-10^{3}$ ≤ Node.data ≤ $10^{3}$
+
+
+# Definition for a binary tree node
+# class TreeNode:
+#     def __init__(self, data):
+#         self.data = data
+#         self.left = None
+#         self.right = None
+
+from ds_v1.BinaryTree.BinaryTree import TreeNode
+from collections import deque
+
+def level_order_traversal(root):
+    if not root:
+        return "None"
+
+    queue = deque()
+    result = []
+    queue.append(root)
+
+
+    while queue:
+        level_size = len(queue)
+        level_nodes = []
+
+        for _ in range(level_size):
+            tmp = queue.popleft()
+            level_nodes.append(str(tmp.data))
+
+            if tmp.left:
+                queue.append(tmp.left)
+            if tmp.right:
+                queue.append(tmp.right)
+        
+        result.append(", ".join(level_nodes))
+    
+    return " : ".join(result)
+
+
+Binary Tree Zigzag Level Order Traversal
+
+Statement
+
+Given a binary tree, return its zigzag level order traversal. The zigzag level order traversal corresponds to traversing nodes from left to right for one level, and then right to left for the next level, and so on, reversing direction after every level.
+
+Constraints
+
+The number of nodes in the tree is in the range 0 to 500.
+
+−100 ≤ node.data ≤ 100
+
+from collections import deque
+from ds_v1.BinaryTree.BinaryTree import TreeNode
+
+# Definition for a binary tree node
+# class TreeNode:
+#     def __init__(self, data):
+#         self.data = data
+#         self.left = None
+#         self.right = None
+
+def zigzag_level_order(root):
+    if not root:
+        return []
+
+    queue = deque()
+    result = []
+    queue.append(root)
+    level = 1
+
+    while queue:
+        level_nodes = deque()
+        queue_len = len(queue)
+
+        for _ in range(queue_len):
+            node = queue.popleft()
+            if level % 2 == 0:
+                level_nodes.appendleft(node.data)
+            else:
+                level_nodes.append(node.data)
+            
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+
+        result.append(list(level_nodes))
+        level += 1
+
+    return result
+
+
+Populating Next Right Pointers in Each Node
+
+Statement
+
+Given a perfect binary tree, where each node contains an additional pointer called next. This pointer is initially set to NULL for all nodes. Your task is to connect all nodes of the same hierarchical level by setting the next pointer to its immediate right node.
+
+The next pointer of the rightmost node at each level is set to NULL.
+
+Constraints
+
+The number of nodes in the tree is in the range [0, 500].
+
+−1000 ≤ Node.data ≤ 1000
+
+
+# class Node:
+#     def __init__(self, data):
+#         self.data = data
+#         self.left = None
+#         self.right = None
+#         self.next = None
+from collections import deque
+
+
+def populate_next_pointers(root):
+    if not root:
+        return []
+    queue = deque()
+    queue.append(root)
+
+    while queue:
+        queue_len = len(queue)
+        for i in range(queue_len):
+            node = queue.popleft()
+            node.next = queue[0] if queue and i < queue_len - 1 else None
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+
+    return root
+
+# class Node:
+#     def __init__(self, data):
+#         self.data = data
+#         self.left = None
+#         self.right = None
+#         self.next = None
+
+def populate_next_pointers(root):
+    if not root:
+        return root
+
+    mostleft = root 
+
+    while mostleft.left:
+
+        current = mostleft
+
+        while current:
+
+            current.left.next = current.right
+
+            if current.next:
+                
+                current.right.next = current.next.left
+
+            current = current.next
+
+        mostleft = mostleft.left
+
+    return root
+
+
+Vertical Order Traversal of a Binary Tree
+
+Statement
+
+Find the vertical order traversal of a binary tree when the root of the binary tree is given. In other words, return the values of the nodes from top to bottom in each column, column by column from left to right. If there is more than one node in the same column and row, return the values from left to right.
+
+Constraints
+
+The number of nodes in the tree is in the range [1, 500].
+
+0 ≤ Node.data ≤ 1000
+def vertical_order(root):
+    if root is None:
+	    return []
+    check_cols = defaultdict(list)
+    queue = deque()
+    queue.append((root, 0))
+    min_col, max_col = 0, 0
+
+    while queue:
+        current, col = queue.popleft()
+
+        if current is not None:
+        	check_cols[col].append(current.data)
+
+	        min_col = min(min_col, col)
+	        max_col = max(max_col, col)
+
+	        queue.append((current.left, col - 1))
+	        queue.append((current.right, col + 1))
+
+    return [check_cols[i] for i in range(min_col, max_col+1)]
+
+
+Symmetric Tree
+
+Statement
+
+Given the root of a binary tree, check whether it is a symmetric tree. A symmetric tree refers to a tree that is the mirror of itself, i.e., symmetric around its root.
+
+Constraints
+
+The tree contains nodes in the range [1,500].
+
+$-10^{3}$ ≤ Node.data ≤ $10^{3}$
+
+
+def is_symmetric(root):
+    if not root:
+        return True
+    
+    queue = deque([(root.left, root.right)])
+    
+    while queue:
+        left, right = queue.popleft()
+        if not left and not right:
+            continue
+        if not left or not right:
+            return False
+        if left.data != right.data:
+            return False
+        
+        queue.append((left.left, right.right))
+        queue.append((left.right, right.left))
+    
+    return True
+
+
+Word Ladder
+
+Statement
+
+Given two words, src and dest, and a list, words, return the number of words in the shortest transformation sequence from src to dest. If no such sequence can be formed, return 00.
+
+A transformation sequence is a sequence of words (src → 𝑤𝑜𝑟𝑑1​ → 𝑤𝑜𝑟𝑑2​ → 𝑤𝑜𝑟𝑑𝑗​ ) that has the following properties:
+
+𝑤𝑜𝑟𝑑𝑗 = dest
+
+Every pair of consecutive words differs by a single character.
+
+All the words in the sequence are present in the words. The src does not need to be present in words.
+
+Constraints
+
+1 ≤ src.length ≤ 10
+
+src.length == dest.length == words[i].length
+
+src ≠ dest
+
+1 ≤  words.length ≤ 5000
+
+No duplicates in the words
+
+src, dest, and words[i] consist of lowercase English characters.
+
+from collections import deque
+
+def word_ladder(src, dest, words):
+    words = set(words)
+    if dest not in words:
+        return 0
+
+    queue = deque()
+    queue.append(src)
+    length = 0
+
+
+    while queue:
+        length += 1
+        size = len(queue)
+
+        for _ in range(size):
+            curr = queue.popleft()
+
+            for i in range(len(curr)):
+
+                alpha = 'abcdefghijklmnopqrstuvwxyz'
+
+                for c in alpha:
+                    temp = list(curr)
+                    temp[i] = c
+                    temp = "".join(temp)
+
+                    if temp == dest:
+                        return length + 1
+
+                    if temp in words:
+                        queue.append(temp)
+                        words.remove(temp)
+
+    return 0
+
+
+Connect All Siblings of a Binary Tree
+
+Statement
+
+Given the root of a perfect binary tree, where each node is equipped with an additional pointer, next, connect all nodes from left to right. Do so in such a way that the next pointer of each node points to its immediate right sibling except for the rightmost node, which points to the first node of the next level.
+
+The next pointer of the last node of the binary tree (i.e., the rightmost node of the last level) should be set to NULL.
+
+Constraints
+
+The number of nodes in the tree is in the range [0, 500].
+
+−1000 ≤ Node.data ≤ 1000
+
+def connect_all_siblings(root):
+	if not root:
+		return root
+	mostleft = root
+
+	while mostleft.left:
+		current = mostleft
+		mostright = None
+
+		while current:
+			current.left.next = current.right
+
+			if current.next:
+				current.right.next = current.next.left
+
+			mostright = current
+			current = current.next
+
+		mostleft = mostleft.left
+		mostright.next = mostleft
+
+
+	return root
+
+
+
