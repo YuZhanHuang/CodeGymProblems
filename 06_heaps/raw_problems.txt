@@ -1,0 +1,652 @@
+Maximize Capital
+
+Statement
+
+A busy investor with an initial capital, c, needs an automated investment program. They can select k distinct projects from a list of n projects with corresponding capitals requirements and expected profits. For a given project i, its capital requirement is capitals[i] , and the profit it yields is profits[i].
+
+The goal is to maximize their cumulative capital by selecting a maximum of k distinct projects to invest in, subject to the constraint that the investor’s current capital must be greater than or equal to the capital requirement of all selected projects.
+
+When a selected project from the identified ones is finished, the pure profit from the project, along with the starting capital of that project is returned to the investor. This amount will be added to the total capital held by the investor. Now, the investor can invest in more projects with the new total capital. It is important to note that each project can only be invested once.
+
+As a basic risk-mitigation measure, the investor wants to limit the number of projects they invest in. For example, if k is 2, the program should identify the two projects that maximize the investor’s profits while ensuring that the investor’s capital is sufficient to invest in the projects.
+
+Overall, the program should help the investor to make informed investment decisions by picking a list of a maximum of k distinct projects to maximize the final profit while mitigating the risk.
+
+Constraints
+
+1≤ k ≤ $10^{5}$
+
+0 ≤ c ≤ $10^{9}$
+
+1 ≤ n ≤ $10^{5}$
+
+k ≤ n
+
+n == profits.length
+
+n == capitals.length
+
+0 ≤ profits[i] ≤ $10^{4}$
+
+0 ≤ capitals[i] ≤ $10^{9}$
+
+from heapq import heappop, heappush
+from min_heap import *
+from max_heap import *
+
+
+def maximum_capital(c, k, capitals, profits):
+    capitals_min_heap = []
+    profits_max_heap = []
+    current_profit = c
+
+    for idx, capital in enumerate(capitals):
+        heappush(capitals_min_heap, (capital, idx))
+  
+    for _ in range(k):
+        while capitals_min_heap and capitals_min_heap[0][0] <= current_profit:
+            _, idx = heappop(capitals_min_heap)
+            heappush(profits_max_heap, (-profits[idx], idx))
+    
+        if not profits_max_heap:
+            break
+
+        profit, _ = heappop(profits_max_heap)
+        max_profit = -profit
+        current_profit += max_profit
+  
+  return current_profit
+
+
+Find Median from a Data Stream
+
+Statement
+
+Create a data structure that can store a list of integers that can change in size over time and find the median from this dynamically growing list in constant time, O(1).
+
+Implement a class, MedianOfStream, which should support the following operations:
+
+Constructor(): This initializes the object of this class, which in turn creates the max and the min heap.
+
+Insert Num(num): This adds an integer, num, to the data structure.
+
+Find Median(): This finds the median of all elements seen so far. If there are an even number of elements, return the average of the two middle values.
+
+https://leetcode.com/problems/find-median-from-data-stream/description/?utm_source=chatgpt.com
+
+Constraints
+
+$-10^{5}$ ≤ num ≤ $10^{5}$ , where num is an integer received from the data stream.
+
+There will be at least one element in the data structure before the median is computed.
+
+At most, $5 \times 10^{4}$ calls will be made to the function that calculates the median.
+
+from heapq import *
+
+
+class MedianOfStream:
+    def __init__(self):
+        self.min_heap_for_large = []
+        self.max_heap_for_small = []
+
+    def insert_num(self, num):
+        if not self.min_heap_for_large or -self.max_heap_for_small[0] >= num:
+            heappush(self.max_heap_for_small, -num)
+        else:
+            heappush(self.min_heap_for_large, num)
+
+        if len(self.max_heap_for_small) - len(self.min_heap_for_large) > 1:
+            heappush(self.min_heap_for_large, -heappop(self.max_heap_for_small))
+        elif len(self.min_heap_for_large) > len(self.max_heap_for_small):
+            heappush(self.max_heap_for_small, -heappop(self.min_heap_for_large))
+
+    def find_median(self):
+        if len(self.min_heap_for_large) == len(self.max_heap_for_small):
+            return (self.min_heap_for_large[0] + (-self.max_heap_for_small[0])) / 2.0
+
+        return -self.max_heap_for_small[0] / 1.0
+
+Sliding Window Median
+
+Statement
+
+Given an integer array, nums, and an integer, k, there is a sliding window of size k, which is moving from the very left to the very right of the array. We can only see the k numbers in the window. Each time the sliding window moves right by one position.
+
+Given this scenario, return the median of the each window. Answers within $10^{-5}$ of the actual value will be accepted.
+
+https://leetcode.com/problems/sliding-window-median/
+
+Constraints:
+
+1 ≤ k ≤ nums.length ≤ $10^3$
+
+$-2^{31}$≤ nums[i] ≤ $2^{31} - 1$
+
+import heapq
+from collections import defaultdict
+
+def median_sliding_window(nums, k):
+    small, large = [], []            # small 為 max‐heap（存負值），large 為 min‐heap
+    delayed = defaultdict(int)       # 懶刪除計數器
+    small_size = large_size = 0      # 記錄兩堆的「有效」元素數量
+    
+    
+    def prune(heap):
+        """
+        清理 heap 頂端那些被標記為刪除的元素
+        """
+        while heap:
+            num = -heap[0] if heap is small else heap[0]
+            if delayed[num] > 0:
+                delayed[num] -= 1
+                heapq.heappop(heap)
+            else:
+                break
+
+    def balance():
+        """
+        平衡兩堆大小，使 small_size == large_size or small_size == large_size + 1
+        """
+        nonlocal small_size, large_size
+        # small 太大 → 拿一個到 large
+        if small_size > large_size + 1:
+            val = -heapq.heappop(small)
+            small_size -= 1
+            heapq.heappush(large, val)
+            large_size += 1
+            prune(small)
+        # large 太大 → 拿一個到 small
+        elif small_size < large_size:
+            val = heapq.heappop(large)
+            large_size -= 1
+            heapq.heappush(small, -val)
+            small_size += 1
+            prune(large)
+
+    def insert(num):
+        """
+        插入新數字到合適的堆，並呼叫 balance()
+        """
+        nonlocal small_size, large_size
+        if not small or num <= -small[0]:
+            heapq.heappush(small, -num)
+            small_size += 1
+        else:
+            heapq.heappush(large, num)
+            large_size += 1
+        balance()
+
+    def erase(num):
+        """
+        標記刪除 num，並在必要時清理堆頂，再呼叫 balance()
+        """
+        nonlocal small_size, large_size
+        delayed[num] += 1
+        # 調整 size 計數
+        # 以下會先決定 num 是在 large 還是 small
+        if num <= -small[0]:
+            small_size -= 1
+            if num == -small[0]:
+                prune(small)
+        else:
+            large_size -= 1
+            if large and num == large[0]:
+                prune(large)
+        balance()
+
+    def get_median():
+        """
+        直接從兩堆堆頂計算中位數
+        """
+        if k & 1:
+            return float(-small[0])
+        return (-small[0] + large[0]) / 2.0
+
+    res = []
+    for i, num in enumerate(nums):
+        insert(num)
+        # 當窗口超過 k，刪除最左側數字
+        if i >= k:
+            erase(nums[i - k])
+        # 從第 k−1 步開始，每次都記錄中位數
+        if i >= k - 1:
+            res.append(get_median())
+    return res
+
+Schedule Tasks on Minimum Machines
+
+Statement
+
+We are given an input array, tasks, where tasks[i] = $[start_i, end_i]$ represents the start and end times of n tasks. Our goal is to schedule these tasks on machines given the following criteria:
+
+A machine can execute only one task at a time.
+
+A machine can begin executing a new task immediately after completing the previous one.
+
+An unlimited number of machines are available.
+
+Find the minimum number of machines required to complete these n tasks.
+
+Constraints:
+
+n = tasks.length
+
+1 ≤ tasks.length ≤ $10^3$
+
+0 ≤ tasksi.start < tasksi.end ≤ $10^4$
+
+import heapq
+
+def minimum_machines(tasks):
+    tasks.sort()
+    mechines = []
+    
+    for start, end in tasks:
+        if mechines and start >= mechines[0]:
+            heapq.heappop(mechines)
+        
+        heapq.heappush(mechines, end)
+    
+    return len(mechines)
+
+
+Minimum Cost to Connect Sticks
+
+Statement
+
+You are given a set of sticks with positive integer lengths represented as an array, sticks, where sticks[i] denotes the length of the $i^{th}$ stick.
+
+You can connect any two sticks into one stick at a cost equal to the sum of their lengths. Once two sticks are combined, they form a new stick whose length is the sum of the two original sticks. This process continues until there is only one stick remaining.
+
+Your task is to determine the minimum cost required to connect all the sticks into a single stick.
+
+Constraints
+
+$1 \le sticks.length \le 10^3$$1 \le sticks[i] \le 10^3$
+
+import heapq
+
+def connect_sticks(sticks):
+    heapq.heapify(sticks)
+    costs = 0
+    
+    while sticks:
+        if len(sticks) == 1:
+            break
+        
+        first = heapq.heappop(sticks)
+        second = heapq.heappop(sticks)
+        costs += (first + second)
+        
+        heapq.heappush(sticks, first + second)
+    
+
+    return costs
+
+Largest Number After Digit Swaps by Parity
+
+Statement
+
+You are given a positive integer num. You can swap any two digits of num as long as they share the same parity (both are odd or both are even).
+
+Your task is to return the largest possible value of num after performing any number of such swaps.
+
+https://leetcode.com/problems/largest-number-after-digit-swaps-by-parity/
+
+Constraints:
+
+$1 \le num \le 10^9$
+
+import heapq
+
+def largest_integer(num):
+    s = str(num)
+    even_heap = []
+    odd_heap = []
+    locations = []  # even == 0, odd == 1 
+    
+    for c in s:
+        val = int(c)
+        is_even = val % 2
+        if is_even == 0:
+            heapq.heappush(even_heap, -val)
+            locations.append(0)
+        else:
+            heapq.heappush(odd_heap, -val)
+            locations.append(1)
+    s = ''
+    for location in locations:
+        if location == 0:
+            val = heapq.heappop(even_heap)
+            val = -val
+            s += str(val)
+        else:
+            val = heapq.heappop(odd_heap)
+            val = -val
+            s += str(val)
+    
+    return int(s)
+
+
+def largest_integer(num: int) -> int:
+    s = str(num)
+    # 1. 計數陣列：記錄每個偶數 / 奇數的出現次數
+    cnt_even = [0]*10
+    cnt_odd  = [0]*10
+    for ch in s:
+        d = ord(ch) - ord('0')
+        if d % 2 == 0:
+            cnt_even[d] += 1
+        else:
+            cnt_odd[d]  += 1
+
+    # 2. 指標：從最大偶數(8)／最大奇數(9)開始
+    next_even = 8
+    next_odd  = 9
+
+    # 3. 重建結果
+    res = []
+    for ch in s:
+        d = ord(ch) - ord('0')
+        if d % 2 == 0:
+            # 找到下一個還有剩餘的「偶數」digit
+            while next_even >= 0 and (next_even % 2 != 0 or cnt_even[next_even] == 0):
+                next_even -= 1
+            res.append(str(next_even))
+            cnt_even[next_even] -= 1
+        else:
+            # 找到下一個還有剩餘的「奇數」digit
+            while next_odd >= 0 and (next_odd % 2 == 0 or cnt_odd[next_odd] == 0):
+                next_odd -= 1
+            res.append(str(next_odd))
+            cnt_odd[next_odd] -= 1
+
+    return int(''.join(res))
+
+
+Find Right Interval
+
+Statement
+
+You are given an array of intervals where each interval is represented by a pair $[start_i, end_i]$. The $start_i$​ values are unique, meaning no two intervals begin at the same time.
+
+The task is to find the right interval for each interval in the list. The right interval for an interval i is an interval j such that $start_j \ge end_i$ and $start_j$ is minimized (i.e., it is the smallest start time among all valid intervals that is greater than or equal to $end_i$​). Note that i may equal j.
+
+Return an array of right interval indexes for each interval i. If no right interval exists for interval i, then put -1 at index i.
+
+Example 1:
+
+Input: intervals = [[1,2]]
+Output: [-1]
+Explanation: There is only one interval in the collection, so it outputs -1.
+
+
+Example 2:
+
+Input: intervals = [[3,4],[2,3],[1,2]]
+Output: [-1,0,1]
+Explanation: There is no right interval for [3,4].
+The right interval for [2,3] is [3,4] since start0 = 3 is the smallest start that is >= end1 = 3.
+The right interval for [1,2] is [2,3] since start1 = 2 is the smallest start that is >= end2 = 2.
+
+
+Example 3:
+Input: intervals = [[1,4],[2,3],[3,4]]
+Output: [-1,2,-1]
+Explanation: There is no right interval for [1,4] and [3,4].
+The right interval for [2,3] is [3,4] since start2 = 3 is the smallest start that is >= end1 = 3.
+
+Constraint
+
+1 ≤ intervals.length ≤ 1000
+
+intervals[i].length == 2
+
+$-10^6 \le start_i \le end_i \le 10^6$The start times are guaranteed to be unique.
+
+import heapq
+    
+    
+def find_right_interval(intervals):
+        result = [-1] * len(intervals)
+        start_heap = []
+        end_heap = []
+    
+        for idx, (start, end) in enumerate(intervals):
+            heapq.heappush(start_heap, (start, idx))
+            heapq.heappush(end_heap, (end, idx))
+        
+        while end_heap:
+            end, idx = heapq.heappop(end_heap)
+            
+            while start_heap and start_heap[0][0] < end:
+                heapq.heappop(start_heap)
+                
+            if start_heap:
+                result[idx] = start_heap[0][1]
+        
+        return result
+
+
+Meeting Rooms III
+
+Statement
+
+You have an integer rooms, representing room numbers from 0 to rooms−1. Additionally, you are given an 2D integer array called meetings, where each element meetings[i] = $[start_i, end_i]$ indicates that a meeting will be held in the half-closed interval$[start_i, end_i)$. Each $start_i$​​ is unique.
+
+Meetings are allocated to rooms in the following manner:
+
+Each meeting will take place in the unused room with the lowest number.
+
+If there are no available rooms, the meeting will be delayed until a room becomes free, maintaining the same duration as the original meeting.
+
+When a room is vacated, the meeting with the earliest original start time is given priority for that room.
+
+Your task is to determine the room number that hosted the highest number of meetings. If there are multiple rooms, return the room with the lowest number.
+
+Note: A half-closed interval [a, b) is the interval between a and b including a and not including b.
+
+import heapq
+
+
+def most_booked(meetings, rooms):
+	count = [0] * rooms
+	available = list(range(rooms))
+	used_rooms = []
+
+	meetings.sort()
+	for start_time, end_time in meetings:
+		while used_rooms and used_rooms[0][0] <= start_time:
+			ending, room = heapq.heappop(used_rooms)
+			heapq.heappush(available, room)
+
+		if not available:
+			end, room = heapq.heappop(used_rooms)
+			end_time = end + (end_time - start_time)
+			heapq.heappush(available, room)
+
+		room = heapq.heappop(available)
+		heapq.heappush(used_rooms, (end_time, room))
+		count[room] += 1
+
+	return count.index(max(count))
+
+
+The Number of the Smallest Unoccupied Chair
+
+Statement
+
+At a party, n friends, numbered from 0 to n−1, arrive and leave at different times. There are infinitely many chairs, numbered 0 onwards. Each arriving friend sits on the smallest available chair at that moment.
+
+For example, if chairs 0, 1, and 5 are occupied when a friend arrives, they will sit on chair number 2.
+
+When a friend leaves, their chair becomes immediately available. If another friend arrives simultaneously, they can take that chair.
+
+You are given a 0-indexed 2D list times, where times[i] = $[arrival_{i}, leaving_{i}]$ represents the arrival and departure times of the $i^{th}$ friend. All arrival times are unique.
+
+Given an integer target_friend, return the chair number that target_friend will sit on.
+
+https://leetcode.com/problems/the-number-of-the-smallest-unoccupied-chair/description/?utm_source=chatgpt.com
+
+Constraints:
+
+n == times.length
+
+times[i].length == 2
+
+1 ≤ arrivali < leavingi ≤ $10^{5}$
+
+0 ≤ target_friend ≤ n−1
+
+Each arrivali time is unique.
+
+import heapq
+
+
+def smallest_chair(times, target_friend):
+    sorted_friends = sorted(enumerate(times), key=lambda x: x[1][0])
+
+	available_chairs = []
+	occupied_chairs = []
+
+	chair_index = 0
+
+
+	for friend_id, (arrival, leaving) in sorted_friends:
+		while occupied_chairs and occupied_chairs[0][0] <= arrival:
+			_, freed_chair = heapq.heappop(occupied_chairs)
+			heapq.heappush(available_chairs, freed_chair)
+
+
+		if available_chairs:
+			assigned_chair = heapq.heappop(available_chairs)
+		else:
+			assigned_chair = chair_index
+			chair_index += 1
+
+		heapq.heappush(occupied_chairs, (leaving, assigned_chair))
+
+		if friend_id == target_friend:
+			return assigned_chair
+
+
+Maximum Average Pass Ratio
+
+Statment
+
+A school has several classes of students, each taking a final exam. You are provided a 2D integer array, classes, where classes[i] = [passi, totali]. Here, passi represents the number of students in the ith class who are expected to pass the exam, and totali represents the total number of students in that class.
+
+Additionally, you are given an integer, extraStudents, which denotes the number of brilliant extra students guaranteed to pass their exams. These students can be assigned to any class, and your goal is to distribute them to maximize the average pass ratio across all classes.
+
+The pass ratio for a class is defined as the ratio of the number of students passing to the total number of students in the class: Pass Ratio = passi​/totali​
+
+The average pass ratio is the sum of the pass ratios of all classes divided by the total number of classes:
+
+Average Pass Ratio=∑(Pass Ratio of each class)Total Number of ClassesAverage 
+
+Your task is to return the maximum achievable average pass ratio after assigning all extraStudents to the classes. Answers within 10^-5 of the actual answer will be accepted.
+
+Constraints:
+
+1 ≤ classes.length ≤ 10**3
+
+classes[i].length == 2
+
+1 ≤ passi ≤ totali ≤ 10**4
+
+1 ≤ extraStudents ≤ 10**4
+
+from heapq import heappush, heappop
+
+def max_average_ratio(classes, extraStudents):
+    n = len(classes)
+    incr_avg_classes = []
+    
+    for passi, total in classes:
+        delta = (total - passi) / (total * (total + 1))
+        heappush(incr_avg_classes, (-delta, passi, total))
+    
+    while extraStudents > 0:
+        best, passi, total = heappop(incr_avg_classes)
+        passi += 1
+        total += 1
+        best = (total - passi) / (total * (total + 1))
+        heappush(incr_avg_classes, (-best, passi, total))
+        extraStudents -= 1
+    
+    return sum((passi/total) for _, passi, total  in incr_avg_classes) / n
+
+
+Longest Happy String
+
+Statement
+
+A string is considered happy if it meets the following conditions:
+
+It comprises only the characters 'a', 'b', and 'c'.
+
+It does not contain the substrings "aaa", "bbb", or "ccc".
+
+The total occurrences of:
+
+The character 'a' does not exceed a.
+
+The character 'b' does not exceed b.
+
+The character 'c' does not exceed c.
+
+You are given three integers, a, b, and c, representing the maximum allowable occurrences of 'a', 'b', and 'c', respectively. Your task is to return the longest possible happy string. If there are multiple valid longest happy strings, return any one of them. If no such string can be formed, return an empty string "".
+
+Note: A substring is a contiguous sequence of characters within a string.
+
+https://leetcode.com/problems/longest-happy-string/
+
+constraints:
+
+$0 \le a, b, c \le 100$$a + b + c \gt 0$
+
+
+import heapq
+
+def longest_diverse_string(a, b, c):
+    # 1. 把正數次數存成負數，推入 max-heap（heapq 是 min-heap）
+    heap = []
+    for count, ch in [(a, 'a'), (b, 'b'), (c, 'c')]:
+        if count > 0:
+            heapq.heappush(heap, (-count, ch))
+
+    res = []
+
+    while heap:
+        cnt1, ch1 = heapq.heappop(heap)
+        rem1 = -cnt1  # 轉回正數，表示還剩多少可用
+      
+        # 如果會連續三個相同，就拿次多的出來
+        if len(res) >= 2 and res[-1] == res[-2] == ch1:
+            if not heap:
+                break       # 沒有第二多，必須停
+            cnt2, ch2 = heapq.heappop(heap)
+            rem2 = -cnt2
+
+            # 用掉一個 ch2
+            rem2 -= 1       # 用減法表達「使用過一個」
+            res.append(ch2)
+
+            # ch2 還有剩再推回 heap（存成負數）
+            if rem2 > 0:
+                heapq.heappush(heap, (-rem2, ch2))
+            # 把剛才被跳過的 ch1 推回 heap
+            heapq.heappush(heap, (-rem1, ch1))
+
+        else:
+            # 直接用 ch1
+            rem1 -= 1       # 用減法表示「使用過一個」
+            res.append(ch1)
+            # rem1 > 0 時再推回 heap
+            if rem1 > 0:
+                heapq.heappush(heap, (-rem1, ch1))
+
+    return ''.join(res)
+
+
